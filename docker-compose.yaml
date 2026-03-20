@@ -40,6 +40,8 @@ services:
     restart: always
     expose:
       - "3001"
+    labels:
+      - "traefik.http.services.textbee-api.loadbalancer.server.port=3001"
     environment:
       - PORT=3001
       - 'MONGO_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@textbee-db:27017/textbee?authSource=admin'
