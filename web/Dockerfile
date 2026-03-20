@@ -29,6 +29,9 @@ COPY . .
 # Set environment variables for building
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+ENV NEXT_PUBLIC_SITE_URL=https://textbee.idomods.pro
+ENV NEXT_PUBLIC_API_BASE_URL=https://textbee-api.idomods.pro/api/v1
 
 # Build the application
 RUN pnpm build
