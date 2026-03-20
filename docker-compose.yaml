@@ -1,73 +1,85 @@
 services:
   textbee-db:
-    image: mongo:latest
+    image: 'mongo:latest'
     restart: always
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-adminUser}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS:-adminPassword}
+      - 'MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-adminUser}'
+      - 'MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS:-adminPassword}'
       - MONGO_INITDB_DATABASE=textbee
     volumes:
-      - mongodb_data:/data/db
+      - 'mongodb_data:/data/db'
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test:
+        - CMD
+        - mongosh
+        - '--eval'
+        - "db.adminCommand('ping')"
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
-
   textbee-redis:
-    image: redis:alpine
+    image: 'redis:alpine'
     restart: always
     volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+      - 'redis_data:/data'
+    command: 'redis-server --appendonly yes'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD
+        - redis-cli
+        - ping
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
-
   textbee-api:
     build:
       context: ./api
       dockerfile: Dockerfile
     restart: always
+    expose:
+      - "3001"
     environment:
       - PORT=3001
-      - MONGO_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@textbee-db:27017/textbee?authSource=admin
-      - JWT_SECRET=${JWT_SECRET}
+      - 'MONGO_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@textbee-db:27017/textbee?authSource=admin'
+      - 'JWT_SECRET=${JWT_SECRET}'
       - JWT_EXPIRATION=60d
-      - FRONTEND_URL=https://textbee.idomods.pro
-      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-      - FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}
-      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
-      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-      - FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}
-      - FIREBASE_CLIENT_C509_CERT_URL=${FIREBASE_CLIENT_C509_CERT_URL}
+      - 'FRONTEND_URL=https://textbee.idomods.pro'
+      - 'FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}'
+      - 'FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}'
+      - 'FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}'
+      - 'FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}'
+      - 'FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}'
+      - 'FIREBASE_CLIENT_C509_CERT_URL=${FIREBASE_CLIENT_C509_CERT_URL}'
       - USE_SMS_QUEUE=false
-      - REDIS_URL=redis://textbee-redis:6379
-      - CLOUDFLARE_TURNSTILE_SECRET_KEY=${CLOUDFLARE_TURNSTILE_SECRET_KEY}
+      - 'REDIS_URL=redis://textbee-redis:6379'
+      - 'CLOUDFLARE_TURNSTILE_SECRET_KEY=${CLOUDFLARE_TURNSTILE_SECRET_KEY}'
+      - 'MAIL_HOST=${MAIL_HOST}'
+      - 'MAIL_PORT=${MAIL_PORT}'
+      - 'MAIL_USER=${MAIL_USER}'
+      - 'MAIL_PASS=${MAIL_PASS}'
+      - 'MAIL_FROM=${MAIL_FROM}'
     depends_on:
       textbee-db:
         condition: service_healthy
-
   textbee-web:
     build:
       context: ./web
       dockerfile: Dockerfile
     restart: always
+    expose:
+      - "3000"
     environment:
       - PORT=3000
-      - NEXT_PUBLIC_SITE_URL=https://textbee.idomods.pro
-      - NEXT_PUBLIC_API_BASE_URL=https://textbee-api.idomods.pro/api/v1
+      - 'NEXT_PUBLIC_SITE_URL=https://textbee.idomods.pro'
+      - 'NEXT_PUBLIC_API_BASE_URL=https://textbee-api.idomods.pro/api/v1'
       - NEXT_PUBLIC_LATEST_APP_VERSION_CODE=17
-      - AUTH_SECRET=${AUTH_SECRET}
-      - DATABASE_URL=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@textbee-db:27017/textbee?authSource=admin
-      - NEXT_PUBLIC_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+      - 'AUTH_SECRET=${AUTH_SECRET}'
+      - 'DATABASE_URL=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@textbee-db:27017/textbee?authSource=admin'
+      - 'NEXT_PUBLIC_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}'
     depends_on:
       - textbee-api
-
 volumes:
-  mongodb_data:
-  redis_data:
+  mongodb_data: null
+  redis_data: null
